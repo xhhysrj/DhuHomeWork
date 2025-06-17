@@ -18,5 +18,31 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="station.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="graph.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="menu.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pathfinder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="station.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="graph.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pathfinder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
