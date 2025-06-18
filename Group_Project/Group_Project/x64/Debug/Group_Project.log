@@ -1,2 +1,6 @@
-﻿  main.cpp
-  Group_Project.vcxproj -> E:\Cpp\Group_Project.1\DhuHomeWork\Group_Project\x64\Debug\Group_Project.exe
+﻿menu.obj : error LNK2005: main 已经在 main.obj 中定义
+menu.obj : error LNK2019: 无法解析的外部符号 "private: void __cdecl MenuSystem::showStationQueryMenu(void)" (?showStationQueryMenu@MenuSystem@@AEAAXXZ)，函数 "public: void __cdecl MenuSystem::run(void)" (?run@MenuSystem@@QEAAXXZ) 中引用了该符号
+menu.obj : error LNK2019: 无法解析的外部符号 "private: void __cdecl MenuSystem::showLineQueryMenu(void)" (?showLineQueryMenu@MenuSystem@@AEAAXXZ)，函数 "public: void __cdecl MenuSystem::run(void)" (?run@MenuSystem@@QEAAXXZ) 中引用了该符号
+menu.obj : error LNK2019: 无法解析的外部符号 "private: void __cdecl MenuSystem::showBusinessModifyMenu(void)" (?showBusinessModifyMenu@MenuSystem@@AEAAXXZ)，函数 "public: void __cdecl MenuSystem::run(void)" (?run@MenuSystem@@QEAAXXZ) 中引用了该符号
+menu.obj : error LNK2019: 无法解析的外部符号 "private: void __cdecl MenuSystem::showNavigationMenu(void)" (?showNavigationMenu@MenuSystem@@AEAAXXZ)，函数 "public: void __cdecl MenuSystem::run(void)" (?run@MenuSystem@@QEAAXXZ) 中引用了该符号
+D:\数据结构课程设计\DhuHomeWork\Group_Project\x64\Debug\Group_Project.exe : fatal error LNK1120: 4 个无法解析的外部命令

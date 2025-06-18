@@ -30,6 +30,15 @@
     <ClCompile Include="pathfinder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="queryStationInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="queryLineInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="modifyBusinessInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="station.h">
@@ -42,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="pathfinder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="function_implement.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

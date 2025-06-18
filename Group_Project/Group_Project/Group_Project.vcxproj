@@ -130,10 +130,14 @@
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
+    <ClCompile Include="modifyBusinessInfo.cpp" />
     <ClCompile Include="pathfinder.cpp" />
+    <ClCompile Include="queryLineInfo.cpp" />
+    <ClCompile Include="queryStationInfo.cpp" />
     <ClCompile Include="station.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="function_implement.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="pathfinder.h" />
