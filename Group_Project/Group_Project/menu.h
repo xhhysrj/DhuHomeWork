@@ -14,6 +14,7 @@ private:
     void showBusinessModifyMenu();  //修改站点开启与关闭
     void showNavigationMenu();  //导航功能
     int getTerminalWidth(); //辅助中心输出
+    void showStationSubMenu(); // 新增
     void clearScreen(); //清屏
 };
 
