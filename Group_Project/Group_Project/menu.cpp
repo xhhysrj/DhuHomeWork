@@ -1,4 +1,5 @@
 #include "menu.h"
+#include"station_query.h"
 #include <iostream>
 #include <limits> 
 #ifdef _WIN32
@@ -54,10 +55,37 @@ void MenuSystem::run() {
         case 2: showLineQueryMenu(); break;
         case 3: showBusinessModifyMenu(); break;
         case 4: showNavigationMenu(); break;
-        case 5: std::cout << "程序已经关闭，再见！" << endl; break;
-        default: std::cout << "无效选择！" << endl;
+        case 5: cout << "程序已经关闭，再见！" << endl; break;
+        default: cout << "无效选择！" << endl;
         }
     } while (choice != 5);
+}
+void MenuSystem::showStationSubMenu() {
+    int choice;
+    do {
+        switch (choice) {
+        case 1: showStationSubMenu(); break; // 修改这一行
+        case 2: {
+            string name;
+            cout << "请输入站点名称: ";
+            cin >> name;
+            // 这里需要添加名称查询逻辑
+            break;
+        }
+        case 3:
+            stationDB.printAllStations();
+            break;
+        case 4:
+            stationDB.printClosedStations();
+            break;
+        case 0:
+            return;
+        default:
+            cout << "无效输入!";
+        }
+
+        pressAnyKeyToContinue();
+    } while (true);
 }
 int main() {
     MenuSystem menu;  

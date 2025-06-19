@@ -142,6 +142,7 @@
     <ClInclude Include="menu.h" />
     <ClInclude Include="pathfinder.h" />
     <ClInclude Include="station.h" />
+    <ClInclude Include="station_query.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
