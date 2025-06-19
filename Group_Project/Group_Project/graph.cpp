@@ -37,3 +37,35 @@ Motor_graph::Motor_graph() {
 		edges[stoi(tokens[0]) - 1001].emplace_back(stoi(tokens[1]), tokens[2], tokens[4]);
 	}
 }
+void Motor_graph::Motor_garph_reset() {
+	ifstream station_file("Station.csv");
+	string line;
+	getline(station_file, line);
+	while (getline(station_file, line)) {
+		stringstream SS(line);
+		string token;
+		vector<string>tokens;
+		while (getline(SS, token,',')) {
+			tokens.push_back(token);
+		}
+		Station[stoi(tokens[0])].status = tokens[3];
+	}
+}
+void Motor_graph::Motor_graph_update() {
+	ifstream station_file("update_station_status.csv");
+	string line;
+	getline(station_file, line);
+	while (getline(station_file, line)) {
+		stringstream SS(line);
+		string token;
+		vector<string>tokens;
+		while (getline(SS, token, ',')) {
+			tokens.push_back(token);
+		}
+		for (int i = 0; i < Vers; i++) {
+			if (Station[i].name == tokens[0] && Station[i].line == tokens[1]) {
+				Station[i].status = tokens[2];
+			}
+		}
+	}
+}
