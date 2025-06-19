@@ -187,6 +187,7 @@ void MotorGraph::printStationConnections(int stationId) const {
     std::cout << "=== 站点连接 ===" << std::endl;
     std::cout << "ID: " << stationId << " | 名称: " << station.name << std::endl;
 
+<<<<<<< HEAD
     const auto& edges = getConnectedEdges(stationId);
     for (const auto& edge : edges) {
         int connectedId = (edge.startId == stationId) ? edge.endId : edge.startId;
@@ -195,5 +196,82 @@ void MotorGraph::printStationConnections(int stationId) const {
             << " | 线路: " << edge.line
             << " | 方向: " << edge.direction
             << " | 时间: " << edge.time << "分钟" << std::endl;
+=======
+    Path(const Path& prev, int next_id, int edge_time)
+        : total_time(prev.total_time + edge_time),
+        path(prev.path),
+        node_set(prev.node_set) {
+        path.push_back(next_id);
+        node_set.insert(next_id);
+    }
+
+    bool contains(int node_id) const {
+        return node_set.find(node_id) != node_set.end();
+    }
+};
+
+// 自定义优先队列比较函数
+struct PathCompare {
+    bool operator()(const Path& a, const Path& b) const {
+        return a.total_time > b.total_time; // 最小堆
+    }
+};
+
+
+//===========================最短路径函数==============================
+//需要传入图，开始站点，中止站点，以及1或3（分别表述输出1条或三条线路）
+
+void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
+    int k = (option == 1) ? 1 : 3; // 根据option确定k值
+    std::priority_queue<Path, std::vector<Path>, PathCompare> pq;
+    std::vector<Path> results; // 存储完整路径对象（包含耗时）
+
+    // 初始化优先队列
+    pq.push(Path(start_id));
+
+    while (!pq.empty() && results.size() < k) {
+        Path cur = pq.top();
+        pq.pop();
+
+        int last_node = cur.path.back();
+        if (last_node == end_id) {
+            results.push_back(cur);
+            continue;
+        }
+
+        // 遍历当前节点的所有邻接边
+        for (const Edge& edge : graph.edges[last_node]) {
+            int next_id = edge.next_station_id;
+            if (!cur.contains(next_id)) {
+                pq.push(Path(cur, next_id, edge.time));
+            }
+        }
+    }
+
+    // 输出所有找到的路径
+    for (const auto& path : results) {
+        // 先输出总耗时
+        std::cout << "总耗时: " << path.total_time << "分钟 - ";
+
+        // 构建路径字符串
+        std::string output;
+        Station& start_station = graph.stations[path.path[0]];
+        output = start_station.name + "(" + start_station.line + ")";
+
+        for (int i = 1; i < path.path.size(); ++i) {
+            Station& prev = graph.stations[path.path[i - 1]];
+            Station& curr = graph.stations[path.path[i]];
+
+            if (prev.name == curr.name) {
+                // 换乘情况
+                output += "-换乘(" + curr.line + ")";
+            }
+            else {
+                // 正常站点移动
+                output += "-" + curr.name + "(" + curr.line + ")";
+            }
+        }
+        std::cout << output << std::endl;
+>>>>>>> f420f8600be3d682ed1ae1404c9b8299abfbc95f
     }
 }
