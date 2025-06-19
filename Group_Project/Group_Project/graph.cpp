@@ -202,10 +202,14 @@ struct PathCompare {
     }
 };
 
+
+//===========================最短路径函数==============================
+//需要传入图，开始站点，中止站点，以及1或3（分别表述输出1条或三条线路）
+
 void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
     int k = (option == 1) ? 1 : 3; // 根据option确定k值
     std::priority_queue<Path, std::vector<Path>, PathCompare> pq;
-    std::vector<std::vector<int>> results;
+    std::vector<Path> results; // 存储完整路径对象（包含耗时）
 
     // 初始化优先队列
     pq.push(Path(start_id));
@@ -216,7 +220,7 @@ void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
 
         int last_node = cur.path.back();
         if (last_node == end_id) {
-            results.push_back(cur.path);
+            results.push_back(cur);
             continue;
         }
 
@@ -231,13 +235,17 @@ void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
 
     // 输出所有找到的路径
     for (const auto& path : results) {
+        // 先输出总耗时
+        std::cout << "总耗时: " << path.total_time << "分钟 - ";
+
+        // 构建路径字符串
         std::string output;
-        Station& start_station = graph.stations[path[0]];
+        Station& start_station = graph.stations[path.path[0]];
         output = start_station.name + "(" + start_station.line + ")";
 
-        for (int i = 1; i < path.size(); ++i) {
-            Station& prev = graph.stations[path[i - 1]];
-            Station& curr = graph.stations[path[i]];
+        for (int i = 1; i < path.path.size(); ++i) {
+            Station& prev = graph.stations[path.path[i - 1]];
+            Station& curr = graph.stations[path.path[i]];
 
             if (prev.name == curr.name) {
                 // 换乘情况
