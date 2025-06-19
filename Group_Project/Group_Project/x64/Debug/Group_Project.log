@@ -1,5 +1,90 @@
 ﻿  graph.cpp
+<<<<<<< Updated upstream
   main.cpp
   station_query.cpp
   正在生成代码...
   Group_Project.vcxproj -> D:\数据结构课程设计\DhuHomeWork\Group_Project\x64\Debug\Group_Project.exe
+=======
+  station_query.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,82): error C2665: “edge::edge”: 没有重载函数可以转换所有参数类型
+  (编译源文件“graph.cpp”)
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\graph.h(15,2):
+      可能是“edge::edge(int,std::string,int)”
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,82):
+          “edge::edge(int,std::string,int)”: 无法将参数 3 从“_Ty”转换为“int”
+          with
+          [
+              _Ty=std::string
+          ]
+              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,103):
+              没有可用于执行该转换的用户定义的转换运算符，或者无法调用该运算符
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,82):
+      尝试匹配参数列表“(_Ty, _Ty, _Ty)”时
+          with
+          [
+              _Ty=int
+          ]
+          and
+          [
+              _Ty=std::string
+          ]
+          and
+          [
+              _Ty=std::string
+          ]
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,82):
+      模板实例化上下文(最早的实例化上下文)为
+          D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\graph.cpp(37,33):
+          查看对正在编译的函数 模板 实例化“void std::list<edge,std::allocator<edge>>::emplace_back<int,_Ty&,_Ty&>(int &&,_Ty &,_Ty &)”的引用
+          with
+          [
+              _Ty=std::string
+          ]
+              D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\graph.cpp(37,45):
+              请参阅 "Motor_graph::Motor_graph" 中对 "std::list<edge,std::allocator<edge>>::emplace_back" 的第一个引用
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\list(1009,29):
+          查看对正在编译的函数 模板 实例化“std::_List_node<_Ty,std::_Default_allocator_traits<_Alloc>::void_pointer> *std::list<_Ty,_Alloc>::_Emplace<int,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&>(std::_List_node<_Ty,std::_Default_allocator_traits<_Alloc>::void_pointer> *const ,int &&,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)”的引用
+          with
+          [
+              _Ty=edge,
+              _Alloc=std::allocator<edge>
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\list(1034,44):
+          查看对正在编译的函数 模板 实例化“std::_List_node_emplace_op2<std::allocator<std::_List_node<_Ty,std::_Default_allocator_traits<_Alloc>::void_pointer>>>::_List_node_emplace_op2<int,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&>(_Alnode &,int &&,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)”的引用
+          with
+          [
+              _Ty=edge,
+              _Alloc=std::allocator<edge>,
+              _Alnode=std::allocator<std::_List_node<edge,std::_Default_allocator_traits<std::allocator<edge>>::void_pointer>>
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\list(595,25):
+          查看对正在编译的函数 模板 实例化“void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&,std::basic_string<char,std::char_traits<char>,std::allocator<char>>&>(_Alloc &,_Objty *const ,int &&,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &,std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)”的引用
+          with
+          [
+              _Alloc=std::allocator<std::_List_node<edge,std::_Default_allocator_traits<std::allocator<edge>>::void_pointer>>,
+              _Ty=edge,
+              _Objty=edge
+          ]
+  
+D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station_query.cpp(25,17): error C2512: “Station”: 没有合适的默认构造函数可用
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station.h(6,8):
+      参见“Station”的声明
+  
+D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station_query.cpp(44,17): error C2039: "lines": 不是 "Station" 的成员
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station.h(6,8):
+      参见“Station”的声明
+  
+D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station_query.cpp(68,29): error C2039: "lines": 不是 "Station" 的成员
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station.h(6,8):
+      参见“Station”的声明
+  
+D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station_query.cpp(115,40): error C2039: "lines": 不是 "Station" 的成员
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station.h(6,8):
+      参见“Station”的声明
+  
+D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station_query.cpp(117,34): error C2039: "lines": 不是 "Station" 的成员
+      D:\数据结构课程设计\DhuHomeWork\Group_Project\Group_Project\station.h(6,8):
+      参见“Station”的声明
+  
+  正在生成代码...
+>>>>>>> Stashed changes
