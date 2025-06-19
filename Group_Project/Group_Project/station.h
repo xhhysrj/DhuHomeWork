@@ -6,6 +6,7 @@ using namespace std;
 struct Station {
     int id;
     string name;
-    vector<string> lines;
-    string status;  // "open"»ò"closed"
+    string line;
+    string status;  // "active"»ò"inactive"
+    Station(int id, string name, string line, string status);
 };
