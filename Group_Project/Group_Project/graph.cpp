@@ -2,7 +2,15 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
+#include <vector>
+#include <list>
+#include <queue>
+#include <unordered_set>
+#include <algorithm>
+#include <string>
+#include <functional>
+#include <set>
+#include <unordered_map>
 // === Edge类实现 ===
 Edge::Edge(int to_id, const std::string& line_name, int travel_time)
     : next_station_id(to_id), line(line_name), time(travel_time) {
@@ -161,5 +169,85 @@ void MotorGraph::getClosedStations() {
 
     if (!found) {
         std::cout << "当前没有关闭的站点" << std::endl;
+    }
+}
+
+struct Path {
+    int total_time;
+    std::vector<int> path; // 存储节点ID序列
+    std::unordered_set<int> node_set; // 快速检查节点是否在路径中
+
+    Path(int start_id) : total_time(0) {
+        path.push_back(start_id);
+        node_set.insert(start_id);
+    }
+
+    Path(const Path& prev, int next_id, int edge_time)
+        : total_time(prev.total_time + edge_time),
+        path(prev.path),
+        node_set(prev.node_set) {
+        path.push_back(next_id);
+        node_set.insert(next_id);
+    }
+
+    bool contains(int node_id) const {
+        return node_set.find(node_id) != node_set.end();
+    }
+};
+
+// 自定义优先队列比较函数
+struct PathCompare {
+    bool operator()(const Path& a, const Path& b) const {
+        return a.total_time > b.total_time; // 最小堆
+    }
+};
+
+void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
+    int k = (option == 1) ? 1 : 3; // 根据option确定k值
+    std::priority_queue<Path, std::vector<Path>, PathCompare> pq;
+    std::vector<std::vector<int>> results;
+
+    // 初始化优先队列
+    pq.push(Path(start_id));
+
+    while (!pq.empty() && results.size() < k) {
+        Path cur = pq.top();
+        pq.pop();
+
+        int last_node = cur.path.back();
+        if (last_node == end_id) {
+            results.push_back(cur.path);
+            continue;
+        }
+
+        // 遍历当前节点的所有邻接边
+        for (const Edge& edge : graph.edges[last_node]) {
+            int next_id = edge.next_station_id;
+            if (!cur.contains(next_id)) {
+                pq.push(Path(cur, next_id, edge.time));
+            }
+        }
+    }
+
+    // 输出所有找到的路径
+    for (const auto& path : results) {
+        std::string output;
+        Station& start_station = graph.stations[path[0]];
+        output = start_station.name + "(" + start_station.line + ")";
+
+        for (int i = 1; i < path.size(); ++i) {
+            Station& prev = graph.stations[path[i - 1]];
+            Station& curr = graph.stations[path[i]];
+
+            if (prev.name == curr.name) {
+                // 换乘情况
+                output += "-换乘(" + curr.line + ")";
+            }
+            else {
+                // 正常站点移动
+                output += "-" + curr.name + "(" + curr.line + ")";
+            }
+        }
+        std::cout << output << std::endl;
     }
 }

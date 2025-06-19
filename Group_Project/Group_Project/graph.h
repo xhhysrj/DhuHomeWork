@@ -11,7 +11,6 @@ public:
     std::string line;
     int time;
     int next_station_id;
-
     Edge(int to_id, const std::string& line_name, int travel_time);
 };
 
