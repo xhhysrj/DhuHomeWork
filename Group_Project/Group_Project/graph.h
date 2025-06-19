@@ -24,6 +24,7 @@ public:
     void reset();  // 重置站点状态
     void update(); // 更新站点状态
     void getClosedStations(); // 获取关闭站点
+
 };
 
 #endif // GRAPH_H
