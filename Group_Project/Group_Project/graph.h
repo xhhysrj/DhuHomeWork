@@ -33,7 +33,9 @@ public:
     // === 工具函数 ===
     void printAllStations() const;
     void printStationConnections(int stationId) const;
-
+    
+    // === 最短路径算法 ===
+    void findPaths(int start_id, int end_id, int option); // 
 private:
     // 邻接表初始化
     void initAdjList();
