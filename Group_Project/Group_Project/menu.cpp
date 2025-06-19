@@ -16,7 +16,6 @@ void MenuSystem::clearScreen()  {
     system("clear");
 #endif
 }
-
 int MenuSystem::getTerminalWidth()  {
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -61,7 +60,7 @@ void MenuSystem::run() {
     } while (choice != 5);
 }
 void MenuSystem::showStationSubMenu() {
-    int choice;
+    int choice=1;
     do {
         switch (choice) {
         case 1: showStationSubMenu(); break; // 修改这一行
@@ -73,10 +72,10 @@ void MenuSystem::showStationSubMenu() {
             break;
         }
         case 3:
-            stationDB.printAllStations();
+            cout << '0';
             break;
         case 4:
-            stationDB.printClosedStations();
+            cout << '0';
             break;
         case 0:
             return;
@@ -84,11 +83,13 @@ void MenuSystem::showStationSubMenu() {
             cout << "无效输入!";
         }
 
-        pressAnyKeyToContinue();
+        //pressAnyKeyToContinue();
     } while (true);
 }
-int main() {
-    MenuSystem menu;  
-    menu.run();       
-    return 0;
-}
+
+
+//int main() {
+//    MenuSystem menu;  
+//    menu.run();       
+//    return 0;
+//}
