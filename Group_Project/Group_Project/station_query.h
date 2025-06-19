@@ -1,28 +1,37 @@
-
 #pragma once
-
-#include <unordered_map>
-#include <string>
+#include "graph.h"
 #include <vector>
-#include "station.h" 
-
-
+#include <string>
+#include <unordered_map>
 class StationQuery {
-private:
-    std::unordered_map<int, Station> stations_; // 存储站点数据
-
 public:
-    explicit StationQuery(const std::string& filePath = "Station.csv");
-    void loadData(const std::string& filePath);
-    std::string getStationName(int id) const;
-    std::string getStationStatus(int id) const;
-    std::vector<std::string> getLinesByStation(int id) const;
-    std::vector<Station> fuzzySearch(const std::string& keyword) const;
-    std::vector<Station> searchByName(const std::string& name) const;
+    // 初始化（自动加载数据）
+    explicit StationQuery(const std::string& stationFile = "Station.csv",
+        const std::string& edgeFile = "Edge.csv");
+
+    // === 基础查询 ===
+    std::string getStationName(int stationId) const;
+    std::vector<std::string> getStationLines(int stationId) const;
+    std::string getStationStatus(int stationId) const;
+
+    // === 高级查询 ===
+    std::vector<int> findStationsByName(const std::string& name, bool fuzzyMatch = false) const;
+    std::vector<int> getStationsOnLine(const std::string& lineName) const;
+    std::vector<Edge> getStationConnections(int stationId) const;
+
+    // === 状态查询 ===
+    bool isStationClosed(int stationId) const;
+    std::vector<int> getAllClosedStations() const;
+
+    // === 打印输出 ===
+    void printStationInfo(int stationId) const;
     void printAllStations() const;
-    void printClosedStations() const;
+    void printLineSummary(const std::string& lineName) const;
 
 private:
-    static bool containsIgnoreCase(const std::string& str, const std::string& substr);
-    static std::vector<std::string> splitString(const std::string& s, char delimiter);
+    MotorGraph graph_; // 底层图数据结构
+    std::unordered_map<int, Station> stations_;
+    // 辅助函数
+    static bool stringContains(const std::string& str, const std::string& substr, bool ignoreCase);
+    bool stringContains(const std::string& str, const std::string& substr, bool ignoreCase) ;
 };

@@ -1,160 +1,121 @@
+#include "station.h"
 #include "station_query.h"
-#include"station.h"
-#include <fstream>
-#include <sstream>
+
 #include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <iostream>
+#include "station_loader.h"
 
-// === 构造函数与数据加载 ===
-StationQuery::StationQuery(const std::string& filePath) {
-    loadData(filePath);
+// === 构造函数 ===
+StationQuery::StationQuery(const std::string& stationFile, const std::string& edgeFile) {
+    graph_.loadStations(stationFile);
+    graph_.loadEdges(edgeFile);
 }
 
-void StationQuery::loadData(const std::string& filePath) {
-    std::ifstream file(filePath);
-    if (!file) {
-        throw std::runtime_error("无法打开站点数据文件: " + filePath);
-    }
-
-    std::string line;
-    std::getline(file, line); // 跳过标题行
-
-    while (std::getline(file, line)) {
-        Station station;
-        std::istringstream ss(line);
-        std::string field;
-
-        // 解析ID
-        std::getline(ss, field, ',');
-        try {
-            station.id = std::stoi(field);
-        }
-        catch (...) {
-            throw std::runtime_error("无效的站点ID格式: " + field);
-        }
-
-        // 解析名称
-        std::getline(ss, station.name, ',');
-
-        // 解析线路（用|分隔）
-        std::string linesStr;
-        std::getline(ss, linesStr, ',');
-        station.lines = StationQuery::splitString(linesStr, '|');
-
-        // 解析状态
-        std::getline(ss, station.status, ',');
-
-        // 存入查找表
-        stations_[station.id] = station;
-    }
+// === 基础查询实现 ===
+std::string StationQuery::getStationName(int stationId) const {
+    return graph_.getStation(stationId).name;
 }
 
-// === 核心查询接口 ===
-std::string StationQuery::getStationName(int id) const {
-    auto it = stations_.find(id);
-    if (it == stations_.end()) {
-        throw std::out_of_range("站点ID " + std::to_string(id) + " 不存在");
-    }
-    return it->second.name;
+std::vector<std::string> StationQuery::getStationLines(int stationId) const {
+    return graph_.getStation(stationId).lines;
 }
 
-std::string StationQuery::getStationStatus(int id) const {
-    return stations_.at(id).status; // 直接返回状态字段
+std::string StationQuery::getStationStatus(int stationId) const {
+    return graph_.getStation(stationId).status;
 }
 
-std::vector<std::string> StationQuery::getLinesByStation(int id) const {
-    return stations_.at(id).lines; // at()自动检查边界
-}
+// === 高级查询实现 ===
+std::vector<int> StationQuery::findStationsByName(const std::string& name, bool fuzzyMatch) const {
+    std::vector<int> result;
+    for (const auto& pair : stations_) {
+        int id = pair.first;
+        const Station& station = pair.second;
 
-// === 搜索功能 ===
-std::vector<Station> StationQuery::fuzzySearch(const std::string& keyword) const {
-    std::vector<Station> results;
-    if (keyword.empty()) return results;
-
-    // C++11/14兼容写法
-    for (const auto& kv : stations_) {
-        const Station& station = kv.second;
-        if (StationQuery::containsIgnoreCase(station.name, keyword)) {
-            results.push_back(station);
+        if (fuzzyMatch ? stringContains(station.name, name, true)
+            : (station.name == name)) {
+            result.push_back(id);
         }
     }
-    return results;
+    return result;
 }
 
-// === 名称精确搜索 ===
-std::vector<Station> StationQuery::searchByName(const std::string& name) const {
-    std::vector<Station> results;
-    for (const auto& kv : stations_) {
-        const Station& station = kv.second;
-        if (station.name == name) {
-            results.push_back(station);
+std::vector<int> StationQuery::getStationsOnLine(const std::string& lineName) const {
+    return graph_.getStationsByLine(lineName);
+}
+
+std::vector<Edge> StationQuery::getStationConnections(int stationId) const {
+    std::vector<Edge> connections;
+    const auto& edges = graph_.getConnectedEdges(stationId);
+    connections.assign(edges.begin(), edges.end());
+    return connections;
+}
+
+// === 状态查询实现 ===
+bool StationQuery::isStationClosed(int stationId) const {
+    return graph_.getStation(stationId).status == "closed";
+}
+
+std::vector<int> StationQuery::getAllClosedStations() const {
+    return graph_.getClosedStations();
+}
+
+// === 打印输出实现 ===
+void StationQuery::printStationInfo(int stationId) const {
+    const Station& s = graph_.getStation(stationId);
+    std::cout << "\n=== 站点详情 ===\n"
+        << "ID: " << stationId << "\n"
+        << "名称: " << s.name << "\n"
+        << "状态: " << (isStationClosed(stationId) ? "关闭" : "运营") << "\n"
+        << "线路: ";
+
+    for (size_t i = 0; i < s.lines.size(); ++i) {
+        if (i != 0) std::cout << ", ";
+        std::cout << s.lines[i];
+    }
+
+    // 打印连接信息
+    const auto& connections = getStationConnections(stationId);
+    if (!connections.empty()) {
+        std::cout << "\n--- 连接站点 ---\n";
+        for (const auto& edge : connections) {
+            int connectedId = (edge.startId == stationId) ? edge.endId : edge.startId;
+            std::cout << "→ " << getStationName(connectedId)
+                << " (" << edge.line << "线 "
+                << edge.direction << "方向, "
+                << edge.time << "分钟)\n";
         }
     }
-    return results;
 }
 
-// === 批量输出 ===
-void StationQuery::printAllStations() const {
-    std::cout << "\n=== 所有站点信息 ===" << std::endl;
-    std::cout << std::left
-        << std::setw(8) << "ID"
-        << std::setw(20) << "名称"
-        << std::setw(10) << "状态"
-        << "线路" << std::endl;
 
-    for (const auto& kv : stations_) {
-        const int& id = kv.first;
-        const Station& station = kv.second;
-
-        std::cout << std::setw(8) << id
-            << std::setw(20) << station.name
-            << std::setw(10) << (station.status == "open" ? "运营中" : "关闭中");
-
-        for (size_t i = 0; i < station.lines.size(); ++i) {
-            if (i != 0) std::cout << "|";
-            std::cout << station.lines[i];
-        }
-        std::cout << std::endl;
+void StationQuery::printLineSummary(const std::string& lineName) const {
+    auto stations = getStationsOnLine(lineName);
+    if (stations.empty()) {
+        std::cout << "未找到线路: " << lineName << "\n";
+        return;
     }
+
+    std::cout << "\n=== " << lineName << " ===\n"
+        << "站点数: " << stations.size() << "\n"
+        << "途经站点: ";
+
+    for (size_t i = 0; i < stations.size(); ++i) {
+        if (i != 0) std::cout << " → ";
+        std::cout << getStationName(stations[i]);
+    }
+    std::cout << "\n";
 }
 
-void StationQuery::printClosedStations() const {
-    std::cout << "\n=== 关闭站点列表 ===" << std::endl;
-    bool found = false;
-    for (const auto& kv : stations_) {
-        const int& id = kv.first;
-        const Station& station = kv.second;
-
-        if (station.status == "closed") {
-            std::cout << "ID: " << id << " 名称: " << station.name << std::endl;
-            found = true;
-        }
-    }
-    if (!found) {
-        std::cout << "当前没有关闭的站点" << std::endl;
-    }
-}
-
-// === 静态辅助方法 ===
-bool StationQuery::containsIgnoreCase(const std::string& str, const std::string& substr) {
-    auto it = std::search(str.begin(), str.end(),
+// === 辅助函数 ===
+bool StationQuery::stringContains(const std::string& str, const std::string& substr, bool ignoreCase) {
+    auto it = std::search(
+        str.begin(), str.end(),
         substr.begin(), substr.end(),
-        [](char ch1, char ch2) {
-            return std::tolower(ch1) == std::tolower(ch2);
+        [ignoreCase](char ch1, char ch2) {
+            return ignoreCase ? (std::tolower(ch1) == std::tolower(ch2))
+                : (ch1 == ch2);
         });
     return it != str.end();
-}
-
-std::vector<std::string> StationQuery::splitString(const std::string& s, char delimiter) {
-    std::vector<std::string> tokens;
-    std::istringstream ss(s);
-    std::string token;
-    while (std::getline(ss, token, delimiter)) {
-        if (!token.empty()) {
-            tokens.push_back(token);
-        }
-    }
-    return tokens;
 }
