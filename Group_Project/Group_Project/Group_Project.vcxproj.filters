@@ -39,6 +39,9 @@
     <ClCompile Include="modifyBusinessInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="station_query.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="station.h">

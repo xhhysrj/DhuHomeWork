@@ -135,6 +135,7 @@
     <ClCompile Include="queryLineInfo.cpp" />
     <ClCompile Include="queryStationInfo.cpp" />
     <ClCompile Include="station.cpp" />
+    <ClCompile Include="station_query.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="function_implement.h" />
