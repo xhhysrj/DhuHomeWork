@@ -1,4 +1,5 @@
 
+#include "station.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -12,7 +13,7 @@ public:
    
     explicit StationInfo(const string& filePath = "Station.csv");
 
-    
+    std::vector<Station> fuzzySearch(const std::string& keyword) const;
     string getStationName(int station_id) const;
     string getStationStatus(int station_id) const;
     vector<string> getLinesByStation(int station_id) const;
@@ -28,10 +29,11 @@ private:
         vector<std::string> lines;
         string status; 
     };
-
-    unordered_map<int, StationData> stations_;
+    static bool containsIgnoreCase(const std::string& str, const std::string& substr);
+};
+    unordered_map<int, Station> stations_;
 
     void loadData(const string& filePath);
-    vector<std::string> splitLine(const string& line, char delimiter) const;
-};
+    vector<std::string> splitLine(const string& line, char delimiter) ;
+
 
