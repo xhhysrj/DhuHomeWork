@@ -1,5 +1,3 @@
-#ifndef STATION_INFO_H
-#define STATION_INFO_H
 
 #include <string>
 #include <vector>
@@ -14,12 +12,12 @@ public:
    
     explicit StationInfo(const string& filePath = "Station.csv");
 
-    // 查询接口
+    
     string getStationName(int station_id) const;
     string getStationStatus(int station_id) const;
     vector<string> getLinesByStation(int station_id) const;
 
-    // 批量查询
+    
     void printAllStations() const;
     void printClosedStations() const;
 
