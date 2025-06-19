@@ -22,5 +22,6 @@ public:
 	Motor_graph();//默认构造函数，从文件中读取站点和路线信息
 	void Motor_garph_reset();//用Stations文件重置站点状态
 	void Motor_graph_update();//用update_station_status文件更新站点状态
+	void get_Station_closed();//获取关闭的站点
 };
 #endif // !GRAPH_H

@@ -5,6 +5,7 @@
 #include<vector>
 #include<string>
 #include<fstream>
+#include<set>
 using namespace std;
 Motor_graph::Motor_graph() {
 	//读取站点信息
@@ -68,4 +69,7 @@ void Motor_graph::Motor_graph_update() {
 			}
 		}
 	}
+}
+void Motor_graph::get_Station_closed() {
+
 }
