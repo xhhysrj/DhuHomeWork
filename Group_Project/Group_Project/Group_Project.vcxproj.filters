@@ -59,5 +59,8 @@
     <ClInclude Include="station_query.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="station_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
