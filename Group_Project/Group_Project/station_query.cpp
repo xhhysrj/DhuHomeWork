@@ -7,13 +7,13 @@
 #include <iostream>
 #include "station_loader.h"
 
-// === ¹¹Ôìº¯Êı ===
+// === æ„é€ å‡½æ•° ===
 StationQuery::StationQuery(const std::string& stationFile, const std::string& edgeFile) {
     graph_.loadStations(stationFile);
     graph_.loadEdges(edgeFile);
 }
 
-// === »ù´¡²éÑ¯ÊµÏÖ ===
+// === åŸºç¡€æŸ¥è¯¢å®ç° ===
 std::string StationQuery::getStationName(int stationId) const {
     return graph_.getStation(stationId).name;
 }
@@ -25,8 +25,20 @@ std::vector<std::string> StationQuery::getStationLines(int stationId) const {
 std::string StationQuery::getStationStatus(int stationId) const {
     return graph_.getStation(stationId).status;
 }
+bool StationQuery::stringContains(const std::string& str, const std::string& substr, bool ignoreCase) {
+    if (substr.empty()) return true; // ç©ºå­—ç¬¦ä¸²æ€»æ˜¯åŒ¹é…
 
-// === ¸ß¼¶²éÑ¯ÊµÏÖ ===
+    auto it = std::search(
+        str.begin(), str.end(),
+        substr.begin(), substr.end(),
+        [ignoreCase](char ch1, char ch2) {
+            return ignoreCase ? (std::tolower(ch1) == std::tolower(ch2)) : (ch1 == ch2);
+        }
+    );
+    return it != str.end();
+}
+
+// === é«˜çº§æŸ¥è¯¢å®ç° ===
 std::vector<int> StationQuery::findStationsByName(const std::string& name, bool fuzzyMatch) const {
     std::vector<int> result;
     for (const auto& pair : stations_) {
@@ -51,8 +63,16 @@ std::vector<Edge> StationQuery::getStationConnections(int stationId) const {
     connections.assign(edges.begin(), edges.end());
     return connections;
 }
-
-// === ×´Ì¬²éÑ¯ÊµÏÖ ===
+void StationQuery::findPaths(int start_id, int end_id, int option) {
+    graph_.findPaths(start_id, end_id, option);
+}
+std::vector<std::string> StationQuery::getAllLines() const {
+    return graph_.getAllLines();
+}
+void StationQuery::setStationStatus(int stationId, const std::string& status) {
+    graph_.setStationStatus(stationId, status);
+}
+// === çŠ¶æ€æŸ¥è¯¢å®ç° ===
 bool StationQuery::isStationClosed(int stationId) const {
     return graph_.getStation(stationId).status == "closed";
 }
@@ -61,30 +81,30 @@ std::vector<int> StationQuery::getAllClosedStations() const {
     return graph_.getClosedStations();
 }
 
-// === ´òÓ¡Êä³öÊµÏÖ ===
+// === æ‰“å°è¾“å‡ºå®ç° ===
 void StationQuery::printStationInfo(int stationId) const {
     const Station& s = graph_.getStation(stationId);
-    std::cout << "\n=== Õ¾µãÏêÇé ===\n"
+    std::cout << "\n=== ç«™ç‚¹è¯¦æƒ… ===\n"
         << "ID: " << stationId << "\n"
-        << "Ãû³Æ: " << s.name << "\n"
-        << "×´Ì¬: " << (isStationClosed(stationId) ? "¹Ø±Õ" : "ÔËÓª") << "\n"
-        << "ÏßÂ·: ";
+        << "åç§°: " << s.name << "\n"
+        << "çŠ¶æ€: " << (isStationClosed(stationId) ? "å…³é—­" : "è¿è¥") << "\n"
+        << "çº¿è·¯: ";
 
     for (size_t i = 0; i < s.lines.size(); ++i) {
         if (i != 0) std::cout << ", ";
         std::cout << s.lines[i];
     }
 
-    // ´òÓ¡Á¬½ÓĞÅÏ¢
+    // æ‰“å°è¿æ¥ä¿¡æ¯
     const auto& connections = getStationConnections(stationId);
     if (!connections.empty()) {
-        std::cout << "\n--- Á¬½ÓÕ¾µã ---\n";
+        std::cout << "\n--- è¿æ¥ç«™ç‚¹ ---\n";
         for (const auto& edge : connections) {
             int connectedId = (edge.startId == stationId) ? edge.endId : edge.startId;
-            std::cout << "¡ú " << getStationName(connectedId)
-                << " (" << edge.line << "Ïß "
-                << edge.direction << "·½Ïò, "
-                << edge.time << "·ÖÖÓ)\n";
+            std::cout << "â†’ " << getStationName(connectedId)
+                << " (" << edge.line << "çº¿ "
+                
+                << edge.time << "åˆ†é’Ÿ)\n";
         }
     }
 }
@@ -93,29 +113,18 @@ void StationQuery::printStationInfo(int stationId) const {
 void StationQuery::printLineSummary(const std::string& lineName) const {
     auto stations = getStationsOnLine(lineName);
     if (stations.empty()) {
-        std::cout << "Î´ÕÒµ½ÏßÂ·: " << lineName << "\n";
+        std::cout << "æœªæ‰¾åˆ°çº¿è·¯: " << lineName << "\n";
         return;
     }
 
     std::cout << "\n=== " << lineName << " ===\n"
-        << "Õ¾µãÊı: " << stations.size() << "\n"
-        << "Í¾¾­Õ¾µã: ";
+        << "ç«™ç‚¹æ•°: " << stations.size() << "\n"
+        << "é€”ç»ç«™ç‚¹: ";
 
     for (size_t i = 0; i < stations.size(); ++i) {
-        if (i != 0) std::cout << " ¡ú ";
+        if (i != 0) std::cout << " â†’ ";
         std::cout << getStationName(stations[i]);
     }
     std::cout << "\n";
 }
 
-// === ¸¨Öúº¯Êı ===
-bool StationQuery::stringContains(const std::string& str, const std::string& substr, bool ignoreCase) {
-    auto it = std::search(
-        str.begin(), str.end(),
-        substr.begin(), substr.end(),
-        [ignoreCase](char ch1, char ch2) {
-            return ignoreCase ? (std::tolower(ch1) == std::tolower(ch2))
-                : (ch1 == ch2);
-        });
-    return it != str.end();
-}

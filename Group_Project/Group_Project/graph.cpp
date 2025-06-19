@@ -1,4 +1,3 @@
-// graph.cpp
 #include "graph.h"
 #include <fstream>
 #include <sstream>
@@ -6,10 +5,36 @@
 #include <stdexcept>
 #include <iomanip>
 #include <iostream>
+#include <queue>
 
-// === ¸¨Öúº¯Êı ===
+// === è·¯å¾„è§„åˆ’ç›¸å…³ç»“æ„ ===
+struct Path {
+    std::vector<int> path;
+    int total_time;
+
+    Path(int start_id) : total_time(0) {
+        path.push_back(start_id);
+    }
+
+    Path(const Path& prev, int next_id, int edge_time) {
+        path = prev.path;
+        path.push_back(next_id);
+        total_time = prev.total_time + edge_time;
+    }
+
+    bool contains(int node) const {
+        return std::find(path.begin(), path.end(), node) != path.end();
+    }
+};
+
+struct PathCompare {
+    bool operator()(const Path& a, const Path& b) const {
+        return a.total_time > b.total_time; // æœ€å°å †
+    }
+};
+
+// === è¾…åŠ©å‡½æ•° ===
 namespace {
-    // ·Ö¸î×Ö·û´®£¨ÓÃÓÚ½âÎöÏßÂ·£©
     std::vector<std::string> splitString(const std::string& s, char delimiter) {
         std::vector<std::string> tokens;
         std::string token;
@@ -19,102 +44,131 @@ namespace {
         }
         return tokens;
     }
+    //å»æ‰é¦–å°¾ç©ºç™½ \r ï¼Œ\n ï¼Œ\t 
+    inline std::string trim(const std::string& s) {
+        size_t first = s.find_first_not_of(" \t\r\n\ufeff");
+        if (first == std::string::npos) return {};
+        size_t last = s.find_last_not_of(" \t\r\n");
+        return s.substr(first, last - first + 1);
+    }
+
 }
 
-// === Êı¾İ¼ÓÔØ ===
+// === æ•°æ®åŠ è½½ ===
 void MotorGraph::loadStations(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw std::runtime_error("ÎŞ·¨´ò¿ªÕ¾µãÎÄ¼ş: " + filePath);
+        throw std::runtime_error("æ— æ³•æ‰“å¼€ç«™ç‚¹æ–‡ä»¶: " + filePath);
     }
 
     std::string line;
-    std::getline(file, line); // Ìø¹ı±êÌâĞĞ
+    std::getline(file, line); // è·³è¿‡æ ‡é¢˜è¡Œ
 
     while (std::getline(file, line)) {
         Station station;
         std::istringstream ss(line);
         std::string field;
 
-        // ½âÎö station_id
+        // è§£æ station_id
         std::getline(ss, field, ',');
+        field = trim(field);              
+        if (field.empty()) continue;      // é˜²æ­¢ç©ºè¡Œ
         station.id = std::stoi(field);
 
-        // ½âÎö station_name
+        // è§£æ station_name
         std::getline(ss, station.name, ',');
 
-        // ½âÎö line£¨´¦Àí¶àÏßÂ·Çé¿ö£©
+        // è§£æ lineï¼ˆå¤„ç†å¤šçº¿è·¯æƒ…å†µï¼‰
         std::getline(ss, field, ',');
         station.line = field;
         station.lines = splitString(field, '|');
 
-        // ½âÎö status
+        // è§£æ status
         std::getline(ss, station.status, ',');
 
         stations[station.id] = station;
+        maxStationId = std::max(maxStationId, station.id);
     }
-    initAdjList(); // ³õÊ¼»¯ÁÚ½Ó±í
-    buildLineIndex(); // ¹¹½¨ÏßÂ·Ë÷Òı
+    //æŒ‰æœ€å¤§ç«™ç‚¹ ID åˆå§‹åŒ–é‚»æ¥è¡¨
+    adjList.clear();
+    adjList.resize(maxStationId + 1);                         
+    buildLineIndex();
 }
 
 void MotorGraph::loadEdges(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw std::runtime_error("ÎŞ·¨´ò¿ª±ßÎÄ¼ş: " + filePath);
+        throw std::runtime_error("æ— æ³•æ‰“å¼€è¾¹æ–‡ä»¶: " + filePath);
     }
 
     std::string line;
-    std::getline(file, line); // Ìø¹ı±êÌâĞĞ
+    std::getline(file, line); // è·³è¿‡æ ‡é¢˜è¡Œ
 
     while (std::getline(file, line)) {
         Edge edge;
         std::istringstream ss(line);
         std::string field;
 
-        // ½âÎö start_station_id
+        // è§£æ start_station_id
         std::getline(ss, field, ',');
+        field = trim(field);
+        if (field.empty()) continue;//é˜²æ­¢ç©ºè¡Œ
         edge.startId = std::stoi(field);
 
-        // ½âÎö end_station_id
+        // è§£æ end_station_id
         std::getline(ss, field, ',');
+        field = trim(field);
+        if (field.empty()) continue;
         edge.endId = std::stoi(field);
 
-        // ½âÎö line
+        // è§£æå®Œ startId / endId åï¼Œè¿™é‡Œéœ€è¦ç«‹å³ä¿è¯å®¹é‡
+        ensureAdjSize(edge.startId);
+        ensureAdjSize(edge.endId);
+
+        // è§£æ line
         std::getline(ss, edge.line, ',');
 
-        // ½âÎö direction
-        std::getline(ss, edge.direction, ',');
+        // è§£æ direction(å…è®¸ä¸ºç©º)
+        std::getline(ss, edge.direction,',');
+        if (edge.direction.empty()) {
+            edge.direction = "";// æ˜¾å¼è®¾ç½®ä¸ºç©ºå­—ç¬¦ä¸²
+        }
+ 
 
-        // ½âÎö time
+        // è§£æ time
         std::getline(ss, field, ',');
+        field = trim(field);
+        if (field.empty()) continue;      // é˜²æ­¢ç©ºè¡Œ
         edge.time = std::stoi(field);
 
-        // ÑéÖ¤Õ¾µã´æÔÚĞÔ
+        // éªŒè¯ç«™ç‚¹å­˜åœ¨æ€§
         if (!hasStation(edge.startId) || !hasStation(edge.endId)) {
-            continue; // »òÅ×³öÒì³£
+            continue;
         }
 
-        // Ìí¼Óµ½ÁÚ½Ó±í£¨Ë«Ïò±ß£©
+
+
+        // æ·»åŠ åˆ°é‚»æ¥è¡¨ï¼ˆåŒå‘è¾¹ï¼‰
         adjList[edge.startId].push_back(edge);
         adjList[edge.endId].emplace_back(edge.endId, edge.startId, edge.line,
-            edge.direction, edge.time);
+             edge.time);
     }
 }
 
-// === Í¼½á¹¹³õÊ¼»¯ ===
+// === å›¾ç»“æ„åˆå§‹åŒ– ===
 void MotorGraph::initAdjList() {
-    adjList.resize(stations.size() + 1); // ID´Ó1¿ªÊ¼Ôò+1£¬·ñÔòÖ±½Ó=size()
+    adjList.resize(stations.size() + 1);
 }
 
 void MotorGraph::buildLineIndex() {
-    for (const auto& [id, station] : stations) {
-        for (const auto& line : station.lines) {
-            lineStations[line].push_back(id);
+    for (const auto& pair : stations) {
+        for (const auto& line : pair.second.lines) {
+            lineStations[line].push_back(pair.first);
         }
     }
 }
 
-// === ²éÑ¯½Ó¿Ú ===
+// === æŸ¥è¯¢æ¥å£ ===
 bool MotorGraph::hasStation(int stationId) const {
     return stations.find(stationId) != stations.end();
 }
@@ -122,19 +176,19 @@ bool MotorGraph::hasStation(int stationId) const {
 const Station& MotorGraph::getStation(int stationId) const {
     auto it = stations.find(stationId);
     if (it == stations.end()) {
-        throw std::out_of_range("Õ¾µãID²»´æÔÚ: " + std::to_string(stationId));
+        throw std::out_of_range("ç«™ç‚¹IDä¸å­˜åœ¨: " + std::to_string(stationId));
     }
     return it->second;
 }
 
 const std::list<Edge>& MotorGraph::getConnectedEdges(int stationId) const {
     if (stationId < 0 || stationId >= adjList.size()) {
-        throw std::out_of_range("ÎŞĞ§Õ¾µãID");
+        throw std::out_of_range("æ— æ•ˆç«™ç‚¹ID");
     }
     return adjList[stationId];
 }
 
-// === ÏßÂ·²éÑ¯ ===
+// === çº¿è·¯æŸ¥è¯¢ ===
 const std::vector<int>& MotorGraph::getStationsByLine(const std::string& lineName) const {
     static const std::vector<int> emptyVector;
     auto it = lineStations.find(lineName);
@@ -149,7 +203,7 @@ std::vector<std::string> MotorGraph::getAllLines() const {
     return lines;
 }
 
-// === ×´Ì¬¹ÜÀí ===
+// === çŠ¶æ€ç®¡ç† ===
 void MotorGraph::setStationStatus(int stationId, const std::string& status) {
     if (hasStation(stationId)) {
         stations[stationId].status = status;
@@ -158,75 +212,45 @@ void MotorGraph::setStationStatus(int stationId, const std::string& status) {
 
 std::vector<int> MotorGraph::getClosedStations() const {
     std::vector<int> closedStations;
-    for (const auto& [id, station] : stations) {
-        if (station.status == "closed") {
-            closedStations.push_back(id);
+    for (const auto& pair : stations) {
+        if (pair.second.status == "closed") {
+            closedStations.push_back(pair.first);
         }
     }
     return closedStations;
 }
 
-// === µ÷ÊÔÊä³ö ===
-void MotorGraph::printAllStations() const {
-    std::cout << "=== ËùÓĞÕ¾µã ===" << std::endl;
-    for (const auto& [id, station] : stations) {
-        std::cout << "ID: " << id
-            << " | Ãû³Æ: " << station.name
-            << " | ÏßÂ·: ";
-        for (const auto& line : station.lines) {
-            std::cout << line << " ";
-        }
-        std::cout << " | ×´Ì¬: " << station.status << std::endl;
-    }
-}
+
 
 void MotorGraph::printStationConnections(int stationId) const {
     if (!hasStation(stationId)) return;
 
-    const auto& station = getStation(stationId);
-    std::cout << "=== Õ¾µãÁ¬½Ó ===" << std::endl;
-    std::cout << "ID: " << stationId << " | Ãû³Æ: " << station.name << std::endl;
+    const Station& station = getStation(stationId);
+    std::cout << "=== ç«™ç‚¹è¿æ¥ ===" << std::endl;
+    std::cout << "ID: " << stationId << " | åç§°: " << station.name << std::endl;
 
-<<<<<<< HEAD
     const auto& edges = getConnectedEdges(stationId);
     for (const auto& edge : edges) {
         int connectedId = (edge.startId == stationId) ? edge.endId : edge.startId;
-        std::cout << "  ¡ú ID: " << connectedId
-            << " | Ãû³Æ: " << getStation(connectedId).name
-            << " | ÏßÂ·: " << edge.line
-            << " | ·½Ïò: " << edge.direction
-            << " | Ê±¼ä: " << edge.time << "·ÖÖÓ" << std::endl;
-=======
-    Path(const Path& prev, int next_id, int edge_time)
-        : total_time(prev.total_time + edge_time),
-        path(prev.path),
-        node_set(prev.node_set) {
-        path.push_back(next_id);
-        node_set.insert(next_id);
+        std::cout << "  â†’ ID: " << connectedId
+            << " | åç§°: " << getStation(connectedId).name
+            << " | çº¿è·¯: " << edge.line
+            <<"|æ–¹å‘ï¼š"<< (edge.direction.empty()?"æ— ":edge.direction)
+            << " | æ—¶é—´: " << edge.time << "åˆ†é’Ÿ" << std::endl;
+    }
+}
+
+// === æœ€çŸ­è·¯å¾„ç®—æ³• ===
+void MotorGraph::findPaths(int start_id, int end_id, int option) {
+    if (!hasStation(start_id) || !hasStation(end_id)) {
+        std::cerr << "é”™è¯¯ï¼šèµ·å§‹ç«™æˆ–ç»ˆç‚¹ç«™ä¸å­˜åœ¨" << std::endl;
+        return;
     }
 
-    bool contains(int node_id) const {
-        return node_set.find(node_id) != node_set.end();
-    }
-};
-
-// ×Ô¶¨ÒåÓÅÏÈ¶ÓÁĞ±È½Ïº¯Êı
-struct PathCompare {
-    bool operator()(const Path& a, const Path& b) const {
-        return a.total_time > b.total_time; // ×îĞ¡¶Ñ
-    }
-};
-
-
-//===========================×î¶ÌÂ·¾¶º¯Êı==============================
-//ĞèÒª´«ÈëÍ¼£¬¿ªÊ¼Õ¾µã£¬ÖĞÖ¹Õ¾µã£¬ÒÔ¼°1»ò3£¨·Ö±ğ±íÊöÊä³ö1Ìõ»òÈıÌõÏßÂ·£©
-
-void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
-    int k = (option == 1) ? 1 : 3; // ¸ù¾İoptionÈ·¶¨kÖµ
+    int k = (option == 1) ? 1 : 3;
     std::priority_queue<Path, std::vector<Path>, PathCompare> pq;
-    std::vector<Path> results; // ´æ´¢ÍêÕûÂ·¾¶¶ÔÏó£¨°üº¬ºÄÊ±£©
+    std::vector<Path> results;
 
-    // ³õÊ¼»¯ÓÅÏÈ¶ÓÁĞ
     pq.push(Path(start_id));
 
     while (!pq.empty() && results.size() < k) {
@@ -239,39 +263,56 @@ void findPaths(MotorGraph& graph, int start_id, int end_id, int option) {
             continue;
         }
 
-        // ±éÀúµ±Ç°½ÚµãµÄËùÓĞÁÚ½Ó±ß
-        for (const Edge& edge : graph.edges[last_node]) {
-            int next_id = edge.next_station_id;
+        // è¾¹ç•Œæ£€æŸ¥
+        if (last_node < 0 || last_node >= static_cast<int>(adjList.size())) {
+            continue;
+        }
+
+        for (const Edge& edge : adjList[last_node]) {
+            int next_id = edge.endId;
+
+            if (next_id < 0 || next_id >= static_cast<int>(adjList.size())) {
+                continue;
+            }
+
             if (!cur.contains(next_id)) {
                 pq.push(Path(cur, next_id, edge.time));
             }
         }
     }
 
-    // Êä³öËùÓĞÕÒµ½µÄÂ·¾¶
+    // è¾“å‡ºç»“æœ
     for (const auto& path : results) {
-        // ÏÈÊä³ö×ÜºÄÊ±
-        std::cout << "×ÜºÄÊ±: " << path.total_time << "·ÖÖÓ - ";
+        std::cout << "æ€»è€—æ—¶: " << path.total_time << "åˆ†é’Ÿ - ";
 
-        // ¹¹½¨Â·¾¶×Ö·û´®
         std::string output;
-        Station& start_station = graph.stations[path.path[0]];
-        output = start_station.name + "(" + start_station.line + ")";
+        try {
+            const Station& start_station = getStation(path.path[0]);
+            output = start_station.name + "(" + start_station.line + ")";
 
-        for (int i = 1; i < path.path.size(); ++i) {
-            Station& prev = graph.stations[path.path[i - 1]];
-            Station& curr = graph.stations[path.path[i]];
+            for (size_t i = 1; i < path.path.size(); ++i) {
+                const Station& prev = getStation(path.path[i - 1]);
+                const Station& curr = getStation(path.path[i]);
 
-            if (prev.name == curr.name) {
-                // »»³ËÇé¿ö
-                output += "-»»³Ë(" + curr.line + ")";
+                if (prev.name == curr.name) {
+                    output += "-æ¢ä¹˜(" + curr.line + ")";
+                }
+                else {
+                    output += "-" + curr.name + "(" + curr.line + ")";
+                }
             }
-            else {
-                // Õı³£Õ¾µãÒÆ¶¯
-                output += "-" + curr.name + "(" + curr.line + ")";
-            }
+            std::cout << output << std::endl;
         }
-        std::cout << output << std::endl;
->>>>>>> f420f8600be3d682ed1ae1404c9b8299abfbc95f
+        catch (const std::out_of_range& e) {
+            std::cerr << "è·¯å¾„åŒ…å«éæ³•ç«™ç‚¹IDï¼š" << e.what() << std::endl;
+        }
+    }
+}
+
+
+//æ”¹é€ åŠ è½½æµç¨‹ï¼Œä¿è¯ adjList è¶³å¤Ÿå¤§
+void MotorGraph::ensureAdjSize(int id) {
+    if (id >= static_cast<int>(adjList.size())) {
+        adjList.resize(id + 1);         // æ‰©å®¹åˆ°èƒ½å®¹çº³ id
     }
 }

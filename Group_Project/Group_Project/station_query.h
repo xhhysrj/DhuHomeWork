@@ -5,33 +5,40 @@
 #include <unordered_map>
 class StationQuery {
 public:
-    // ³õÊ¼»¯£¨×Ô¶¯¼ÓÔØÊı¾İ£©
+    // åˆå§‹åŒ–ï¼ˆè‡ªåŠ¨åŠ è½½æ•°æ®ï¼‰
     explicit StationQuery(const std::string& stationFile = "Station.csv",
         const std::string& edgeFile = "Edge.csv");
 
-    // === »ù´¡²éÑ¯ ===
+    // === åŸºç¡€æŸ¥è¯¢ ===
     std::string getStationName(int stationId) const;
     std::vector<std::string> getStationLines(int stationId) const;
     std::string getStationStatus(int stationId) const;
 
-    // === ¸ß¼¶²éÑ¯ ===
+    // === é«˜çº§æŸ¥è¯¢ ===
     std::vector<int> findStationsByName(const std::string& name, bool fuzzyMatch = false) const;
     std::vector<int> getStationsOnLine(const std::string& lineName) const;
     std::vector<Edge> getStationConnections(int stationId) const;
 
-    // === ×´Ì¬²éÑ¯ ===
+    // === çŠ¶æ€æŸ¥è¯¢ ===
     bool isStationClosed(int stationId) const;
     std::vector<int> getAllClosedStations() const;
 
-    // === ´òÓ¡Êä³ö ===
+    // === æ‰“å°è¾“å‡º ===
     void printStationInfo(int stationId) const;
-    void printAllStations() const;
+    
     void printLineSummary(const std::string& lineName) const;
-
+    // === è·¯å¾„æŸ¥è¯¢åŠŸèƒ½ ===
+    void findPaths(int start_id, int end_id, int option);
+    // === çº¿è·¯æŸ¥è¯¢åŠŸèƒ½ ===
+    std::vector<std::string> getAllLines() const;
+    // === çŠ¶æ€ç®¡ç† ===
+    void setStationStatus(int stationId, const std::string& status);
+    
 private:
-    MotorGraph graph_; // µ×²ãÍ¼Êı¾İ½á¹¹
+    MotorGraph graph_; // åº•å±‚å›¾æ•°æ®ç»“æ„
     std::unordered_map<int, Station> stations_;
-    // ¸¨Öúº¯Êı
+    // è¾…åŠ©å‡½æ•°
     static bool stringContains(const std::string& str, const std::string& substr, bool ignoreCase);
-    bool stringContains(const std::string& str, const std::string& substr, bool ignoreCase) ;
+
+    
 };

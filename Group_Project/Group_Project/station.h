@@ -2,44 +2,44 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <utility> // ÓÃÓÚpair
+#include <utility> // ç”¨äºpair
 
-// Õ¾µã»ù´¡ĞÅÏ¢£¨ÍêÈ«Æ¥ÅäStation.csv¸ñÊ½£©
+// ç«™ç‚¹åŸºç¡€ä¿¡æ¯ï¼ˆå®Œå…¨åŒ¹é…Station.csvæ ¼å¼ï¼‰
 struct Station {
     int id;                  // station_id
     std::string name;        // station_name
-    std::string line;        // Ö÷ÏßÂ·£¨Èç"1ºÅÏß"£©
-    std::vector<std::string> lines; // ¸ÃÕ¾µãËùÊôµÄËùÓĞÏßÂ·£¨´Óline×Ö¶Î½âÎö£¬ÓÃ'|'·Ö¸ô£©
-    std::string status;      // "open"»ò"closed"
+    std::string line;        // ä¸»çº¿è·¯ï¼ˆå¦‚"1å·çº¿"ï¼‰
+    std::vector<std::string> lines; // è¯¥ç«™ç‚¹æ‰€å±çš„æ‰€æœ‰çº¿è·¯ï¼ˆä»lineå­—æ®µè§£æï¼Œç”¨'|'åˆ†éš”ï¼‰
+    std::string status;      // "open"æˆ–"closed"
 
-    // ¹¹Ôìº¯Êı£¨¿ÉÑ¡£¬±ãÓÚ³õÊ¼»¯£©
+    // æ„é€ å‡½æ•°ï¼ˆå¯é€‰ï¼Œä¾¿äºåˆå§‹åŒ–ï¼‰
     Station(int id = -1, std::string name = "", std::string line = "", std::string status = "open")
         : id(id), name(std::move(name)), line(std::move(line)), status(std::move(status)) {
         if (!this->line.empty()) {
-            lines.push_back(this->line); // ÖÁÉÙ°üº¬Ö÷ÏßÂ·
+            lines.push_back(this->line); // è‡³å°‘åŒ…å«ä¸»çº¿è·¯
         }
     }
 };
 
-// Á¬½Ó±ßĞÅÏ¢£¨ÍêÈ«Æ¥ÅäEdge.csv¸ñÊ½£©
+// è¿æ¥è¾¹ä¿¡æ¯ï¼ˆå®Œå…¨åŒ¹é…Edge.csvæ ¼å¼ï¼‰
 struct Edge {
     int startId;            // start_station_id
     int endId;              // end_station_id
-    std::string line;       // ËùÊôÏßÂ·£¨Èç"1ºÅÏß"£©
-    std::string direction;  // ·½Ïò£¨Èç"ÉÏĞĞ"£©
-    int time;               // Ê±¼ä£¨·ÖÖÓ£©
+    std::string line;       // æ‰€å±çº¿è·¯ï¼ˆå¦‚"1å·çº¿"ï¼‰
+    std::string direction;  //çº¿è·¯æ–¹å‘,å¯ä¸ºç©ºå­—ç¬¦ä¸²
+    int time;               // æ—¶é—´ï¼ˆåˆ†é’Ÿï¼‰
 
-    // ¹¹Ôìº¯Êı£¨¿ÉÑ¡£¬±ãÓÚ³õÊ¼»¯£©
+    // æ„é€ å‡½æ•°ï¼ˆå¯é€‰ï¼Œä¾¿äºåˆå§‹åŒ–ï¼‰
     Edge(int start = -1, int end = -1, std::string line = "",
-        std::string dir = "", int t = 0)
+         int t = 0)
         : startId(start), endId(end), line(std::move(line)),
-        direction(std::move(dir)), time(t) {
+        time(t) {
     }
 };
 
-// ÏßÂ·ĞÅÏ¢À©Õ¹£¨¿ÉÑ¡£¬ÓÃÓÚ¸ß¼¶²éÑ¯£©
+// çº¿è·¯ä¿¡æ¯æ‰©å±•ï¼ˆå¯é€‰ï¼Œç”¨äºé«˜çº§æŸ¥è¯¢ï¼‰
 struct LineInfo {
-    std::string name;       // ÏßÂ·Ãû
-    std::vector<int> stationIds; // ÏßÂ·°üº¬µÄÕ¾µãID£¨°´Ë³Ğò£©
-    std::vector<std::pair<int, int>> segments; // Á¬½Ó¶Î£¨startId, endId£©
+    std::string name;       // çº¿è·¯å
+    std::vector<int> stationIds; // çº¿è·¯åŒ…å«çš„ç«™ç‚¹IDï¼ˆæŒ‰é¡ºåºï¼‰
+    std::vector<std::pair<int, int>> segments; // è¿æ¥æ®µï¼ˆstartId, endIdï¼‰
 };

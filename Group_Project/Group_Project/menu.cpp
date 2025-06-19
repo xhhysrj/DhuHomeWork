@@ -1,8 +1,12 @@
 #include "menu.h"
 #include <iostream>
+#include <vector>
+#include <unordered_map>
+
 #include <limits>
 #include <string>
-#include <iomanip>  // ÓÃÓÚsetw¸ñÊ½¿ØÖÆ
+#include <iomanip>
+#include <algorithm>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -12,7 +16,10 @@
 
 using namespace std;
 
-// === »ù´¡¹¤¾ßº¯Êý ===
+// === æž„é€ å‡½æ•° ===
+MenuSystem::MenuSystem(StationQuery& query) : stationQuery(query) {}
+
+// === åŸºç¡€å·¥å…·å‡½æ•° ===
 void MenuSystem::clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -33,87 +40,306 @@ int MenuSystem::getTerminalWidth() {
 #endif
 }
 
-// === ²Ëµ¥ÊµÏÖ ===
+void MenuSystem::pressAnyKeyToContinue() {
+    cout << "\næŒ‰ä»»æ„é”®ç»§ç»­...";
+    cin.ignore(1000, '\n');
+    cin.get();
+}
+
+// === ä¸»èœå• ===
 void MenuSystem::showMainMenu() {
     clearScreen();
     int width = getTerminalWidth();
-    string title = "ÉÏº£µØÌúÂ·¾¶¹æ»®ÏµÍ³";
+    string title = "ä¸Šæµ·åœ°é“è·¯å¾„è§„åˆ’ç³»ç»Ÿ";
 
-    // ¾ÓÖÐÏÔÊ¾±êÌâ
     cout << string((width - title.length()) / 2, ' ') << title << endl
-        << string((width - 9) / 2, ' ') << "Welcome£¡" << endl << endl;
+        << string((width - 9) / 2, ' ') << "Welcomeï¼" << endl << endl;
 
-    cout << "ÇëÑ¡Ôñ²Ù×÷£º" << endl
-        << "  1. ²éÑ¯Õ¾µãÐÅÏ¢" << endl
-        << "  2. ²éÑ¯ÏßÂ·ÐÅÏ¢" << endl
-        << "  3. ÐÞ¸ÄÕ¾µã×´Ì¬" << endl
-        << "  4. µ¼º½¹¦ÄÜ" << endl
-        << "  5. ÍË³ö³ÌÐò" << endl
-        << "ÇëÊäÈëÑ¡Ôñ£º";
+    cout << "è¯·é€‰æ‹©æ“ä½œï¼š" << endl
+        << "  1. æŸ¥è¯¢ç«™ç‚¹ä¿¡æ¯" << endl
+        << "  2. æŸ¥è¯¢çº¿è·¯ä¿¡æ¯" << endl
+        << "  3. ä¿®æ”¹ç«™ç‚¹çŠ¶æ€" << endl
+        << "  4. å¯¼èˆªåŠŸèƒ½" << endl
+        << "  5. é€€å‡ºç¨‹åº" << endl
+        << "è¯·è¾“å…¥é€‰æ‹©ï¼š";
 }
 
+// === ç«™ç‚¹æŸ¥è¯¢èœå• ===
 void MenuSystem::showStationQueryMenu() {
     int choice;
     do {
         clearScreen();
-        cout << "=== Õ¾µã²éÑ¯ ===" << endl
-            << "1. °´ID²éÑ¯" << endl
-            << "2. °´Ãû³Æ²éÑ¯" << endl
-            << "3. ²é¿´ËùÓÐÕ¾µã" << endl
-            << "0. ·µ»ØÖ÷²Ëµ¥" << endl
-            << "ÇëÊäÈëÑ¡Ôñ£º";
+        cout << "=== ç«™ç‚¹æŸ¥è¯¢ ===" << endl
+            << "1. æŒ‰IDæŸ¥è¯¢" << endl
+            << "2. æŒ‰åç§°æŸ¥è¯¢" << endl
+            << "3. æŸ¥çœ‹å…³é—­ç«™ç‚¹" << endl
+            << "0. è¿”å›žä¸»èœå•" << endl
+            << "è¯·è¾“å…¥é€‰æ‹©ï¼š";
 
         if (!(cin >> choice)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "ÊäÈëÎÞÐ§£¬ÇëÖØÐÂÊäÈë£¡" << endl;
+            cout << "è¾“å…¥æ— æ•ˆï¼Œè¯·é‡æ–°è¾“å…¥ï¼" << endl;
+            pressAnyKeyToContinue();
             continue;
         }
 
         switch (choice) {
-        case 1: {
-            cout << "¹¦ÄÜ¿ª·¢ÖÐ£¬°´ÈÎÒâ¼ü·µ»Ø..." << endl;
-            break;
+        case 1: queryStationById(); break;
+        case 2: queryStationByName(); break;
+        case 3: showClosedStations(); break;
+        case 0: return;
+        default: cout << "æ— æ•ˆé€‰é¡¹ï¼" << endl;
         }
-        case 0:
-            return;
-        default:
-            cout << "¹¦ÄÜ¿ª·¢ÖÐ£¬°´ÈÎÒâ¼ü·µ»Ø..." << endl;
-        }
-        cin.ignore();
-        cin.get();
+        pressAnyKeyToContinue();
     } while (true);
 }
 
-// === ÆäËû²Ëµ¥Õ¼Î»ÊµÏÖ ===
+void MenuSystem::queryStationById() {
+    int id;
+    cout << "è¯·è¾“å…¥ç«™ç‚¹ID: ";
+    if (!(cin >> id)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "æ— æ•ˆçš„ç«™ç‚¹IDï¼";
+        return;
+    }
+
+    try {
+        stationQuery.printStationInfo(id);
+    }
+    catch (const out_of_range& e) {
+        cout << "é”™è¯¯: " << e.what() << endl;
+    }
+}
+
+void MenuSystem::queryStationByName() {
+    string name;
+    cout << "è¯·è¾“å…¥ç«™ç‚¹åç§°: ";
+    cin.ignore();
+    getline(cin, name);
+
+    bool fuzzy;
+    cout << "æ˜¯å¦æ¨¡ç³ŠåŒ¹é…? (1=æ˜¯ 0=å¦): ";
+    cin >> fuzzy;
+
+    auto results = stationQuery.findStationsByName(name, fuzzy);
+    if (results.empty()) {
+        cout << "æœªæ‰¾åˆ°åŒ¹é…ç«™ç‚¹ï¼" << endl;
+        return;
+    }
+
+    cout << "æ‰¾åˆ° " << results.size() << " ä¸ªåŒ¹é…ç«™ç‚¹:" << endl;
+    for (int id : results) {
+        stationQuery.printStationInfo(id);
+        cout << "----------------" << endl;
+    }
+}
+
+void MenuSystem::showClosedStations() {
+    auto closed = stationQuery.getAllClosedStations();
+    if (closed.empty()) {
+        cout << "å½“å‰æ²¡æœ‰å…³é—­çš„ç«™ç‚¹" << endl;
+        return;
+    }
+
+    cout << "=== å…³é—­ç«™ç‚¹åˆ—è¡¨ ===" << endl;
+    for (int id : closed) {
+        cout << "ID: " << id
+            << " åç§°: " << stationQuery.getStationName(id) << endl;
+    }
+}
+
+// === çº¿è·¯æŸ¥è¯¢èœå• ===
 void MenuSystem::showLineQueryMenu() {
-    clearScreen();
-    cout << "=== ÏßÂ·²éÑ¯ ===" << endl
-        << "£¨¹¦ÄÜ¿ª·¢ÖÐ£©" << endl
-        << "°´ÈÎÒâ¼ü·µ»Ø...";
+    int choice;
+    do {
+        clearScreen();
+        cout << "=== çº¿è·¯æŸ¥è¯¢ ===" << endl
+            << "1. æŸ¥è¯¢çº¿è·¯è¯¦æƒ…" << endl
+            << "2. åˆ—å‡ºæ‰€æœ‰çº¿è·¯" << endl
+            << "0. è¿”å›žä¸»èœå•" << endl
+            << "è¯·è¾“å…¥é€‰æ‹©ï¼š";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "è¾“å…¥æ— æ•ˆï¼Œè¯·é‡æ–°è¾“å…¥ï¼" << endl;
+            pressAnyKeyToContinue();
+            continue;
+        }
+
+        switch (choice) {
+        case 1: queryLineInfo(); break;
+        case 2: listAllLines(); break;
+        case 0: return;
+        default: cout << "æ— æ•ˆé€‰é¡¹ï¼" << endl;
+        }
+        pressAnyKeyToContinue();
+    } while (true);
+}
+void MenuSystem::listAllLines() {
+    auto lines = stationQuery.getAllLines(); // è°ƒç”¨ StationQuery æŽ¥å£èŽ·å–çº¿è·¯åˆ—è¡¨
+    if (lines.empty()) {
+        cout << "å½“å‰æ²¡æœ‰çº¿è·¯ä¿¡æ¯ã€‚" << endl;
+        return;
+    }
+
+    cout << "=== æ‰€æœ‰çº¿è·¯ ===" << endl;
+    for (const auto& line : lines) {
+        cout << "- " << line << endl;
+    }
+}
+void MenuSystem::queryLineInfo() {
+    string lineName;
+    cout << "è¯·è¾“å…¥çº¿è·¯åç§°(å¦‚'1å·çº¿'): ";
     cin.ignore();
-    cin.get();
+    getline(cin, lineName);
+
+    stationQuery.printLineSummary(lineName);
 }
 
+
+// === ç«™ç‚¹çŠ¶æ€ä¿®æ”¹èœå• ===
 void MenuSystem::showBusinessModifyMenu() {
-    clearScreen();
-    cout << "=== Õ¾µã×´Ì¬ÐÞ¸Ä ===" << endl
-        << "£¨¹¦ÄÜ¿ª·¢ÖÐ£©" << endl
-        << "°´ÈÎÒâ¼ü·µ»Ø...";
-    cin.ignore();
-    cin.get();
+    int choice;
+    do {
+        clearScreen();
+        cout << "=== ç«™ç‚¹çŠ¶æ€ä¿®æ”¹ ===" << endl
+            << "1. è®¾ç½®ç«™ç‚¹çŠ¶æ€" << endl
+            << "2. æ‰¹é‡è®¾ç½®çº¿è·¯çŠ¶æ€" << endl
+            << "0. è¿”å›žä¸»èœå•" << endl
+            << "è¯·è¾“å…¥é€‰æ‹©ï¼š";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "è¾“å…¥æ— æ•ˆï¼Œè¯·é‡æ–°è¾“å…¥ï¼" << endl;
+            pressAnyKeyToContinue();
+            continue;
+        }
+
+        switch (choice) {
+        case 1: modifySingleStation(); break;
+        case 2: modifyLineStations(); break;
+        case 0: return;
+        default: cout << "æ— æ•ˆé€‰é¡¹ï¼" << endl;
+        }
+        pressAnyKeyToContinue();
+    } while (true);
 }
 
+void MenuSystem::modifySingleStation() {
+    int id;
+    string status;
+
+    cout << "è¯·è¾“å…¥ç«™ç‚¹ID: ";
+    if (!(cin >> id)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "æ— æ•ˆçš„ç«™ç‚¹IDï¼";
+        return;
+    }
+
+    cout << "è®¾ç½®çŠ¶æ€(open/closed): ";
+    cin >> status;
+
+    try {
+        stationQuery.setStationStatus(id, status);
+        cout << "ä¿®æ”¹æˆåŠŸï¼å½“å‰çŠ¶æ€: "
+            << (stationQuery.isStationClosed(id) ? "closed" : "open") << endl;
+    }
+    catch (const exception& e) {
+        cout << "é”™è¯¯: " << e.what() << endl;
+    }
+}
+
+void MenuSystem::modifyLineStations() {
+    string lineName, status;
+
+    cout << "è¯·è¾“å…¥çº¿è·¯åç§°: ";
+    cin.ignore();
+    getline(cin, lineName);
+
+    cout << "è®¾ç½®çŠ¶æ€(open/closed): ";
+    cin >> status;
+
+    auto stations = stationQuery.getStationsOnLine(lineName);
+    if (stations.empty()) {
+        cout << "æœªæ‰¾åˆ°è¯¥çº¿è·¯ï¼" << endl;
+        return;
+    }
+
+    for (int id : stations) {
+        stationQuery.setStationStatus(id, status);
+    }
+    cout << "å·²æ‰¹é‡ä¿®æ”¹ " << stations.size() << " ä¸ªç«™ç‚¹çŠ¶æ€ä¸º " << status << endl;
+}
+
+// === å¯¼èˆªèœå• ===
 void MenuSystem::showNavigationMenu() {
-    clearScreen();
-    cout << "=== µ¼º½¹¦ÄÜ ===" << endl
-        << "£¨¹¦ÄÜ¿ª·¢ÖÐ£©" << endl
-        << "°´ÈÎÒâ¼ü·µ»Ø...";
-    cin.ignore();
-    cin.get();
+    int choice;
+    do {
+        clearScreen();
+        cout << "=== å¯¼èˆªåŠŸèƒ½ ===" << endl
+            << "1. æŸ¥è¯¢æœ€çŸ­è·¯å¾„" << endl
+            << "2. æŸ¥è¯¢æ¢ä¹˜æœ€å°‘è·¯å¾„" << endl
+            << "0. è¿”å›žä¸»èœå•" << endl
+            << "è¯·è¾“å…¥é€‰æ‹©ï¼š";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "è¾“å…¥æ— æ•ˆï¼Œè¯·é‡æ–°è¾“å…¥ï¼" << endl;
+            pressAnyKeyToContinue();
+            continue;
+        }
+
+        switch (choice) {
+        case 1: findShortestPath(); break;
+        case 2: findMinTransferPath(); break;
+        case 0: return;
+        default: cout << "æ— æ•ˆé€‰é¡¹ï¼" << endl;
+        }
+        pressAnyKeyToContinue();
+    } while (true);
 }
 
-// === Ö÷¿ØÖÆÑ­»· ===
+void MenuSystem::findShortestPath() {
+    int startId, endId, option;
+
+    cout << "è¯·è¾“å…¥èµ·ç‚¹ç«™ID: ";
+    if (!(cin >> startId)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "æ— æ•ˆçš„ç«™ç‚¹IDï¼";
+        return;
+    }
+
+    cout << "è¯·è¾“å…¥ç»ˆç‚¹ç«™ID: ";
+    if (!(cin >> endId)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "æ— æ•ˆçš„ç«™ç‚¹IDï¼";
+        return;
+    }
+
+    cout << "æ˜¾ç¤ºå‡ æ¡è·¯å¾„? (1æˆ–3): ";
+    cin >> option;
+
+    try {
+        stationQuery.findPaths(startId, endId, option);
+    }
+    catch (const exception& e) {
+        cout << "å¯¼èˆªå¤±è´¥: " << e.what() << endl;
+    }
+}
+
+void MenuSystem::findMinTransferPath() {
+    cout << "æ¢ä¹˜æœ€å°‘è·¯å¾„åŠŸèƒ½å¼€å‘ä¸­..." << endl;
+}
+
+// === ä¸»æŽ§åˆ¶å¾ªçŽ¯ ===
 void MenuSystem::run() {
     int choice;
     do {
@@ -121,7 +347,8 @@ void MenuSystem::run() {
         if (!(cin >> choice)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "ÎÞÐ§ÊäÈë£¡" << endl;
+            cout << "æ— æ•ˆè¾“å…¥ï¼" << endl;
+            pressAnyKeyToContinue();
             continue;
         }
 
@@ -130,8 +357,8 @@ void MenuSystem::run() {
         case 2: showLineQueryMenu(); break;
         case 3: showBusinessModifyMenu(); break;
         case 4: showNavigationMenu(); break;
-        case 5: cout << "³ÌÐòÒÑÍË³ö" << endl; break;
-        default: cout << "ÎÞÐ§Ñ¡Ïî£¡" << endl;
+        case 5: cout << "ç¨‹åºå·²é€€å‡º" << endl; break;
+        default: cout << "æ— æ•ˆé€‰é¡¹ï¼" << endl;
         }
     } while (choice != 5);
 }

@@ -8,36 +8,40 @@
 
 class MotorGraph {
 public:
-    // === ºËĞÄÊı¾İ½á¹¹ ===
-    std::unordered_map<int, Station> stations;   // Õ¾µã¹şÏ£±í£ºID -> Station
-    std::vector<std::list<Edge>> adjList;        // ÁÚ½Ó±í£¨°´Õ¾µãIDË÷Òı£©
-    std::unordered_map<std::string, std::vector<int>> lineStations; // ÏßÂ·µ½Õ¾µãIDµÄÓ³Éä
+    // === æ ¸å¿ƒæ•°æ®ç»“æ„ ===
+    std::unordered_map<int, Station> stations;   // ç«™ç‚¹å“ˆå¸Œè¡¨ï¼šID -> Station
+    std::vector<std::list<Edge>> adjList;        // é‚»æ¥è¡¨ï¼ˆæŒ‰ç«™ç‚¹IDç´¢å¼•ï¼‰
+    std::unordered_map<std::string, std::vector<int>> lineStations; // çº¿è·¯åˆ°ç«™ç‚¹IDçš„æ˜ å°„
 
-    // === Êı¾İ¼ÓÔØ½Ó¿Ú ===
-    void loadStations(const std::string& filePath); // ¼ÓÔØStation.csv
-    void loadEdges(const std::string& filePath);    // ¼ÓÔØEdge.csv
+    // === æ•°æ®åŠ è½½æ¥å£ ===
+    void loadStations(const std::string& filePath); // åŠ è½½Station.csv
+    void loadEdges(const std::string& filePath);    // åŠ è½½Edge.csv
 
-    // === »ù´¡²éÑ¯½Ó¿Ú ===
+    // === åŸºç¡€æŸ¥è¯¢æ¥å£ ===
     bool hasStation(int stationId) const;
     const Station& getStation(int stationId) const;
     const std::list<Edge>& getConnectedEdges(int stationId) const;
 
-    // === ÏßÂ·²éÑ¯½Ó¿Ú ===
+    // === çº¿è·¯æŸ¥è¯¢æ¥å£ ===
     const std::vector<int>& getStationsByLine(const std::string& lineName) const;
     std::vector<std::string> getAllLines() const;
 
-    // === ×´Ì¬¹ÜÀí ===
+    // === çŠ¶æ€ç®¡ç† ===
     void setStationStatus(int stationId, const std::string& status);
     std::vector<int> getClosedStations() const;
 
-    // === ¹¤¾ßº¯Êı ===
-    void printAllStations() const;
+    // === å·¥å…·å‡½æ•° ===
+    
     void printStationConnections(int stationId) const;
-
+    
+    // === æœ€çŸ­è·¯å¾„ç®—æ³• ===
+    void findPaths(int start_id, int end_id, int option); // 
 private:
-    // ÁÚ½Ó±í³õÊ¼»¯
+    // é‚»æ¥è¡¨åˆå§‹åŒ–
     void initAdjList();
 
-    // ÏßÂ·Êı¾İ¹¹½¨
+    // çº¿è·¯æ•°æ®æ„å»º
     void buildLineIndex();
+    int maxStationId = 0;               // å½“å‰å·²çŸ¥çš„æœ€å¤§ç«™ç‚¹ ID
+    void ensureAdjSize(int id);         // è¿™é‡Œä¸ºäº†ä¿è¯ adjList è¶³å¤Ÿå¤§
 };

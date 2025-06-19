@@ -1,21 +1,43 @@
-#ifndef MENU_SYSTEM_H
-#define MENU_SYSTEM_H
-
-#include <string>
-
+#pragma once
+#include "station_query.h"
+#include "graph.h"
+#include<string>
 class MenuSystem {
 public:
+    explicit MenuSystem(StationQuery& query);
     void run();
 
 private:
-    void showMainMenu();    //Ö÷²Ëµ¥
-    void showStationQueryMenu();    //Õ¾µãĞÅÏ¢
-    void showLineQueryMenu();   //Â·ÏßĞÅÏ¢
-    void showBusinessModifyMenu();  //ĞŞ¸ÄÕ¾µã¿ªÆôÓë¹Ø±Õ
-    void showNavigationMenu();  //µ¼º½¹¦ÄÜ
-    int getTerminalWidth(); //¸¨ÖúÖĞĞÄÊä³ö
-    void showStationSubMenu(); // ĞÂÔö
-    void clearScreen(); //ÇåÆÁ
-};
+    StationQuery& stationQuery;
 
-#endif#pragma once
+    // å·¥å…·å‡½æ•°
+    void clearScreen();
+    int getTerminalWidth();
+    void pressAnyKeyToContinue();
+
+    // èœå•å‡½æ•°
+    void showMainMenu();
+    void showStationQueryMenu();
+    void showLineQueryMenu();
+    void showBusinessModifyMenu();
+    void showNavigationMenu();
+
+    // å­åŠŸèƒ½
+    void queryStationById();
+    void queryStationByName();
+    void showClosedStations();
+    void queryLineInfo();
+    void listAllLines();
+    void modifySingleStation();
+    void modifyLineStations();
+    void findShortestPath();
+    void findMinTransferPath();
+    // === è·¯å¾„æŸ¥è¯¢ ===
+    void findPaths(int start_id, int end_id, int option); // ç”¨äºè·¯å¾„è§„åˆ’
+
+    // === çº¿è·¯ä¿¡æ¯ ===
+    std::vector<std::string> getAllLines() const; // è·å–æ‰€æœ‰çº¿è·¯åç§°
+
+    // === çŠ¶æ€ç®¡ç† ===
+    void setStationStatus(int stationId, const std::string& status); // è®¾ç½®ç«™ç‚¹çŠ¶æ€
+};

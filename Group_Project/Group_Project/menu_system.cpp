@@ -18,24 +18,24 @@ void MenuSystem::clearScreen() {
 }
 
 int MenuSystem::getTerminalWidth() {
-    // ÊµÏÖÍ¬Ç°...
+    // å®ç°åŒå‰...
 }
 
 void MenuSystem::showMainMenu() {
     clearScreen();
     int width = getTerminalWidth();
-    string text1 = "ÉÏº£µØÌúÂ·¾¶¹æ»®ÏµÍ³";
+    string text1 = "ä¸Šæµ·åœ°é“è·¯å¾„è§„åˆ’ç³»ç»Ÿ";
     cout << string((width - text1.length()) / 2, ' ') << text1 << endl;
-    string text2 = "Welcome£¡";
+    string text2 = "Welcomeï¼";
     cout << string((width - text2.length()) / 2, ' ') << text2 << endl;
 
-    cout << "ÇëÑ¡ÔñÄú½ÓÏÂÀ´µÄ²Ù×÷£º" << endl;
-    cout << "\t1. ²éÑ¯Õ¾µãĞÅÏ¢" << endl;
-    cout << "\t2. ²éÑ¯µØÌúÏßÂ·ĞÅÏ¢" << endl;
-    cout << "\t3. ĞŞ¸ÄÕ¾µãÓªÒµĞÅÏ¢" << endl;
-    cout << "\t4. µ¼º½¹¦ÄÜ" << endl;
-    cout << "\t0. ÍË³ö³ÌĞò" << endl;
-    cout << "ÇëÊäÈëÄúµÄÑ¡Ôñ£º";
+    cout << "è¯·é€‰æ‹©æ‚¨æ¥ä¸‹æ¥çš„æ“ä½œï¼š" << endl;
+    cout << "\t1. æŸ¥è¯¢ç«™ç‚¹ä¿¡æ¯" << endl;
+    cout << "\t2. æŸ¥è¯¢åœ°é“çº¿è·¯ä¿¡æ¯" << endl;
+    cout << "\t3. ä¿®æ”¹ç«™ç‚¹è¥ä¸šä¿¡æ¯" << endl;
+    cout << "\t4. å¯¼èˆªåŠŸèƒ½" << endl;
+    cout << "\t0. é€€å‡ºç¨‹åº" << endl;
+    cout << "è¯·è¾“å…¥æ‚¨çš„é€‰æ‹©ï¼š";
 }
 
 void MenuSystem::run() {
@@ -58,10 +58,10 @@ void MenuSystem::run() {
             showNavigationMenu();
             break;
         case 0:
-            cout << "¸ĞĞ»Ê¹ÓÃ£¬ÔÙ¼û£¡" << endl;
+            cout << "æ„Ÿè°¢ä½¿ç”¨ï¼Œå†è§ï¼" << endl;
             break;
         default:
-            cout << "ÎŞĞ§µÄÑ¡Ôñ£¬ÇëÖØĞÂÊäÈë£¡" << endl;
+            cout << "æ— æ•ˆçš„é€‰æ‹©ï¼Œè¯·é‡æ–°è¾“å…¥ï¼" << endl;
             cin.ignore();
             cin.get();
             break;
@@ -69,4 +69,4 @@ void MenuSystem::run() {
     } while (choice != 0);
 }
 
-// ÆäËû²Ëµ¥º¯ÊıµÄÊµÏÖ...
+// å…¶ä»–èœå•å‡½æ•°çš„å®ç°...
