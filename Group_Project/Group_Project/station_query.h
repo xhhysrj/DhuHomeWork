@@ -35,4 +35,3 @@ private:
     vector<std::string> splitLine(const string& line, char delimiter) const;
 };
 
-#endif // STATION_INFO_H
