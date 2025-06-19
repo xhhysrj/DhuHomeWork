@@ -1,27 +1,30 @@
-#pragma once
 #ifndef GRAPH_H
 #define GRAPH_H
-#include<iostream>
-#include<list>
-#include<vector>
-#include<string>
-#include"station.h"
-using namespace std;
-class edge {
+
+#include <string>
+#include <vector>
+#include <list>
+#include "station.h"
+
+class Edge {
 public:
-	string line;
-	int time;
-	int next_station_id;
-	edge(int next_station_id,string line,int time ):line(line),time(time),next_station_id(next_station_id){}
+    std::string line;
+    int time;
+    int next_station_id;
+
+    Edge(int to_id, const std::string& line_name, int travel_time);
 };
-class Motor_graph {
+
+class MotorGraph {
 public:
-	int Vers;
-	vector<Station> Station;
-	vector<list<edge>>edges;
-	Motor_graph();//默认构造函数，从文件中读取站点和路线信息
-	void Motor_garph_reset();//用Stations文件重置站点状态
-	void Motor_graph_update();//用update_station_status文件更新站点状态
-	void get_Station_closed();//获取关闭的站点
+    int Vers;
+    std::vector<Station> stations;
+    std::vector<std::list<Edge>> edges;
+
+    MotorGraph();  // 默认构造函数
+    void reset();  // 重置站点状态
+    void update(); // 更新站点状态
+    void getClosedStations(); // 获取关闭站点
 };
-#endif // !GRAPH_H
+
+#endif // GRAPH_H
