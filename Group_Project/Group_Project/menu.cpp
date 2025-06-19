@@ -1,22 +1,28 @@
 #include "menu.h"
-#include"station_query.h"
 #include <iostream>
-#include <limits> 
+#include <limits>
+#include <string>
+#include <iomanip>  // 用于setw格式控制
+
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
+
 using namespace std;
-void MenuSystem::clearScreen()  {
+
+// === 基础工具函数 ===
+void MenuSystem::clearScreen() {
 #ifdef _WIN32
     system("cls");
 #else
     system("clear");
 #endif
 }
-int MenuSystem::getTerminalWidth()  {
+
+int MenuSystem::getTerminalWidth() {
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -27,69 +33,106 @@ int MenuSystem::getTerminalWidth()  {
     return size.ws_col;
 #endif
 }
-void MenuSystem::showMainMenu() {
-    system("cls"); 
-    int width = getTerminalWidth();
-    string text1 = "上海地铁路径规划系统";
-    cout << string((width - text1.length()) / 2, ' ') << text1 << endl;
-    string text2 = "Welcome！";
-    cout << string((width - text2.length()) / 2, ' ') << text2 << endl;
 
-    cout << "请选择您接下来的操作：" << endl;
-    cout << "\t1.查询站点信息（根据您给出的站点名称或ID，提供该站点包括站点ID，站点名称，经过线路，站内营业信息）" << endl;
-    cout << "\t2.查询地铁线路信息（根据您给出的线路名称，提供该线路所经过的站点的信息）" << endl;
-    cout << "\t3.修改站点营业的信息（您可以根据实际情况提供某个站内的营业信息或者查询关闭的站点或者恢复所有站点到初始状态）" << endl;
-    cout << "\t4.导航功能（根据您提供的起点和终点信息，为您规划出合理路线）" << endl;
-    cout << "\t5.退出程序" << endl;
-    cout << "ps.以上功能模块均具有模糊搜索的功能！" << endl;
-    cout << "请输入您的选择：";
+// === 菜单实现 ===
+void MenuSystem::showMainMenu() {
+    clearScreen();
+    int width = getTerminalWidth();
+    string title = "上海地铁路径规划系统";
+
+    // 居中显示标题
+    cout << string((width - title.length()) / 2, ' ') << title << endl
+        << string((width - 9) / 2, ' ') << "Welcome！" << endl << endl;
+
+    cout << "请选择操作：" << endl
+        << "  1. 查询站点信息" << endl
+        << "  2. 查询线路信息" << endl
+        << "  3. 修改站点状态" << endl
+        << "  4. 导航功能" << endl
+        << "  5. 退出程序" << endl
+        << "请输入选择：";
 }
+
+void MenuSystem::showStationQueryMenu() {
+    int choice;
+    do {
+        clearScreen();
+        cout << "=== 站点查询 ===" << endl
+            << "1. 按ID查询" << endl
+            << "2. 按名称查询" << endl
+            << "3. 查看所有站点" << endl
+            << "0. 返回主菜单" << endl
+            << "请输入选择：";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "输入无效，请重新输入！" << endl;
+            continue;
+        }
+
+        switch (choice) {
+        case 1: {
+            cout << "功能开发中，按任意键返回..." << endl;
+            break;
+        }
+        case 0:
+            return;
+        default:
+            cout << "功能开发中，按任意键返回..." << endl;
+        }
+        cin.ignore();
+        cin.get();
+    } while (true);
+}
+
+// === 其他菜单占位实现 ===
+void MenuSystem::showLineQueryMenu() {
+    clearScreen();
+    cout << "=== 线路查询 ===" << endl
+        << "（功能开发中）" << endl
+        << "按任意键返回...";
+    cin.ignore();
+    cin.get();
+}
+
+void MenuSystem::showBusinessModifyMenu() {
+    clearScreen();
+    cout << "=== 站点状态修改 ===" << endl
+        << "（功能开发中）" << endl
+        << "按任意键返回...";
+    cin.ignore();
+    cin.get();
+}
+
+void MenuSystem::showNavigationMenu() {
+    clearScreen();
+    cout << "=== 导航功能 ===" << endl
+        << "（功能开发中）" << endl
+        << "按任意键返回...";
+    cin.ignore();
+    cin.get();
+}
+
+// === 主控制循环 ===
 void MenuSystem::run() {
     int choice;
     do {
         showMainMenu();
-        cin >> choice;
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "无效输入！" << endl;
+            continue;
+        }
+
         switch (choice) {
         case 1: showStationQueryMenu(); break;
         case 2: showLineQueryMenu(); break;
         case 3: showBusinessModifyMenu(); break;
         case 4: showNavigationMenu(); break;
-        case 5: cout << "程序已经关闭，再见！" << endl; break;
-        default: cout << "无效选择！" << endl;
+        case 5: cout << "程序已退出" << endl; break;
+        default: cout << "无效选项！" << endl;
         }
     } while (choice != 5);
 }
-void MenuSystem::showStationSubMenu() {
-    int choice=1;
-    do {
-        switch (choice) {
-        case 1: showStationSubMenu(); break; // 修改这一行
-        case 2: {
-            string name;
-            cout << "请输入站点名称: ";
-            cin >> name;
-            // 这里需要添加名称查询逻辑
-            break;
-        }
-        case 3:
-            cout << '0';
-            break;
-        case 4:
-            cout << '0';
-            break;
-        case 0:
-            return;
-        default:
-            cout << "无效输入!";
-        }
-
-        //pressAnyKeyToContinue();
-    } while (true);
-}
-
-
-//int main() {
-//    MenuSystem menu;  
-//    menu.run();       
-//    return 0;
-//}

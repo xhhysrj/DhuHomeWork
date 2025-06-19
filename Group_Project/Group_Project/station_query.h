@@ -1,39 +1,28 @@
 
-#include "station.h"
+#pragma once
+
+#include <unordered_map>
 #include <string>
 #include <vector>
-#include <unordered_map>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-using namespace std;
+#include "station.h" 
 
-class StationInfo {
+
+class StationQuery {
+private:
+    std::unordered_map<int, Station> stations_; // ´æ´¢Õ¾µãÊý¾Ý
+
 public:
-   
-    explicit StationInfo(const string& filePath = "Station.csv");
-
+    explicit StationQuery(const std::string& filePath = "Station.csv");
+    void loadData(const std::string& filePath);
+    std::string getStationName(int id) const;
+    std::string getStationStatus(int id) const;
+    std::vector<std::string> getLinesByStation(int id) const;
     std::vector<Station> fuzzySearch(const std::string& keyword) const;
-    string getStationName(int station_id) const;
-    string getStationStatus(int station_id) const;
-    vector<string> getLinesByStation(int station_id) const;
-
-    
+    std::vector<Station> searchByName(const std::string& name) const;
     void printAllStations() const;
     void printClosedStations() const;
 
 private:
-    struct StationData {
-        int id;
-        string name;
-        vector<std::string> lines;
-        string status; 
-    };
     static bool containsIgnoreCase(const std::string& str, const std::string& substr);
+    static std::vector<std::string> splitString(const std::string& s, char delimiter);
 };
-    unordered_map<int, Station> stations_;
-
-    void loadData(const string& filePath);
-    vector<std::string> splitLine(const string& line, char delimiter) ;
-
-
